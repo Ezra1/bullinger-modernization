@@ -35,12 +35,110 @@ ROMAN = {
     "xc": 90,
 }
 # Ordinal words for "The first Sermon", "The second Sermon"
-ORDINAL_WORDS = [
-    "first", "second", "third", "fourth", "fifth", "sixth", "seventh",
-    "eighth", "eight", "ninth", "tenth", "eleventh", "twelfth", "thirteenth",
-    "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth",
-    "nineteenth", "twentieth", "twenty-first", "twenty-second",
-]
+# NOTE: Some headings use "The Eight Sermon." (not "eighth"). Treat both as 8.
+ORDINAL_TO_INT: dict[str, int] = {
+    "first": 1,
+    "second": 2,
+    "third": 3,
+    "fourth": 4,
+    "fifth": 5,
+    "sixth": 6,
+    "seventh": 7,
+    "eighth": 8,
+    "eight": 8,
+    "ninth": 9,
+    "tenth": 10,
+    "eleventh": 11,
+    "twelfth": 12,
+    "thirteenth": 13,
+    "fourteenth": 14,
+    "fifteenth": 15,
+    "sixteenth": 16,
+    "seventeenth": 17,
+    "eighteenth": 18,
+    "nineteenth": 19,
+    "twentieth": 20,
+    "twenty-first": 21,
+    "twenty-second": 22,
+    "twenty-third": 23,
+    "twenty-fourth": 24,
+    "twenty-fifth": 25,
+    "twenty-sixth": 26,
+    "twenty-seventh": 27,
+    "twenty-eighth": 28,
+    "twenty-ninth": 29,
+    "thirtieth": 30,
+    "thirty-first": 31,
+    "thirty-second": 32,
+    "thirty-third": 33,
+    "thirty-fourth": 34,
+    "thirty-fifth": 35,
+    "thirty-sixth": 36,
+    "thirty-seventh": 37,
+    "thirty-eighth": 38,
+    "thirty-ninth": 39,
+    "fortieth": 40,
+    "forty-first": 41,
+    "forty-second": 42,
+    "forty-third": 43,
+    "forty-fourth": 44,
+    "forty-fifth": 45,
+    "forty-sixth": 46,
+    "forty-seventh": 47,
+    "forty-eighth": 48,
+    "forty-ninth": 49,
+    "fiftieth": 50,
+    "fifty-first": 51,
+    "fifty-second": 52,
+    "fifty-third": 53,
+    "fifty-fourth": 54,
+    "fifty-fifth": 55,
+    "fifty-sixth": 56,
+    "fifty-seventh": 57,
+    "fifty-eighth": 58,
+    "fifty-ninth": 59,
+    "sixtieth": 60,
+    "sixty-first": 61,
+    "sixty-second": 62,
+    "sixty-third": 63,
+    "sixty-fourth": 64,
+    "sixty-fifth": 65,
+    "sixty-sixth": 66,
+    "sixty-seventh": 67,
+    "sixty-eighth": 68,
+    "sixty-ninth": 69,
+    "seventieth": 70,
+    "seventy-first": 71,
+    "seventy-second": 72,
+    "seventy-third": 73,
+    "seventy-fourth": 74,
+    "seventy-fifth": 75,
+    "seventy-sixth": 76,
+    "seventy-seventh": 77,
+    "seventy-eighth": 78,
+    "seventy-ninth": 79,
+    "eightieth": 80,
+    "eighty-first": 81,
+    "eighty-second": 82,
+    "eighty-third": 83,
+    "eighty-fourth": 84,
+    "eighty-fifth": 85,
+    "eighty-sixth": 86,
+    "eighty-seventh": 87,
+    "eighty-eighth": 88,
+    "eighty-ninth": 89,
+    "ninetieth": 90,
+    "ninety-first": 91,
+    "ninety-second": 92,
+    "ninety-third": 93,
+    "ninety-fourth": 94,
+    "ninety-fifth": 95,
+    "ninety-sixth": 96,
+    "ninety-seventh": 97,
+    "ninety-eighth": 98,
+    "ninety-ninth": 99,
+    "hundredth": 100,
+}
 
 # Curated proper noun modernizations (period spelling -> modern)
 PROPER_NOUN_MAP = {
@@ -189,18 +287,18 @@ def parse_sermon_heading(line: str) -> tuple[int | None, str]:
     if not line.startswith("##"):
         return None, line
     rest = line[2:].strip()
-    # Match "The first Sermon", "The.xiij. Sermon", "The xv. Sermon", "The.xxvj. Sermon"
-    # Try ordinal word first
-    for i, word in enumerate(ORDINAL_WORDS, 1):
-        pat = re.compile(r"\bThe\s+" + re.escape(word) + r"\s+Sermon\.?\s*$", re.IGNORECASE)
-        if pat.search(rest):
-            title = pat.sub("", rest).strip()
-            # Trim trailing ¶ and period
+    # Match ordinal: "The second Sermon." (sometimes followed by extra text on same line)
+    for word, num in ORDINAL_TO_INT.items():
+        pat = re.compile(r"\bThe\s+" + re.escape(word) + r"\s+Sermon\.?\b", re.IGNORECASE)
+        m = pat.search(rest)
+        if m:
+            title = rest[: m.start()].strip()
             title = re.sub(r"\s*¶\s*$", "", title).strip()
-            return i, title
-    # Roman: "The.xiij. Sermon" or "The xiij. Sermon"
+            return num, title
+    # Roman: "The.xiij. Sermon" / "The.xxxiij. Sermon" / "The.XCvij. Sermon"
+    # (Period style often includes extra dots and uses j ~ i.)
     roman_pat = re.compile(
-        r"\bThe\.?\s*([ivxlcdm]+)\.?\s*Sermon\.?\s*$",
+        r"\bThe\.?\s*\.?\s*([ivxlcdmj]+)\.?\s*Sermon\.?\s*$",
         re.IGNORECASE,
     )
     m = roman_pat.search(rest)
@@ -212,6 +310,41 @@ def parse_sermon_heading(line: str) -> tuple[int | None, str]:
             return num, title
     # No sermon number (e.g. main title)
     return None, rest
+
+
+def parse_sermon_heading_extra(line: str) -> tuple[int | None, str, str]:
+    """
+    Like parse_sermon_heading(), but also returns any trailing text that occurs
+    *after* the 'The ... Sermon.' marker on the same line.
+    """
+    line = line.strip()
+    if not line.startswith("##"):
+        return None, line, ""
+    rest = line[2:].strip()
+
+    for word, num in ORDINAL_TO_INT.items():
+        pat = re.compile(r"\bThe\s+" + re.escape(word) + r"\s+Sermon\.?\b", re.IGNORECASE)
+        m = pat.search(rest)
+        if m:
+            title = rest[: m.start()].strip()
+            extra = rest[m.end() :].strip()
+            title = re.sub(r"\s*¶\s*$", "", title).strip()
+            return num, title, extra
+
+    roman_pat = re.compile(
+        r"\bThe\.?\s*\.?\s*([ivxlcdmj]+)\.?\s*Sermon\.?\b",
+        re.IGNORECASE,
+    )
+    m = roman_pat.search(rest)
+    if m:
+        num = _roman_to_int(m.group(1))
+        if num is not None:
+            title = rest[: m.start()].strip()
+            extra = rest[m.end() :].strip()
+            title = re.sub(r"\s*¶\s*$", "", title).strip()
+            return num, title, extra
+
+    return None, rest, ""
 
 
 def collect_proper_nouns(blocks: list[tuple[str, str]]) -> list[tuple[str, str]]:
@@ -315,7 +448,21 @@ def main() -> None:
         input_path = Path(args.input)
 
     if not input_path.exists():
-        raise SystemExit(f"Input file not found: {input_path}")
+        # Helpful fallback: many runs name files like 04-modernized/draft_<model>.txt
+        if args.input == "llm_draft":
+            modern_dir = repo_root / "04-modernized"
+            candidates = sorted(
+                modern_dir.glob("draft_*.txt"),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )
+            if candidates:
+                input_path = candidates[0]
+                print(f"Input 'llm_draft' not found; using newest draft: {input_path}")
+            else:
+                raise SystemExit(f"Input file not found: {input_path}")
+        else:
+            raise SystemExit(f"Input file not found: {input_path}")
 
     metadata_path = Path(args.metadata) if args.metadata else repo_root / "02-cleaned" / "metadata.json"
     meta = {}
@@ -345,7 +492,7 @@ def main() -> None:
     para_in_sermon = 0
     for i, (orig, mod) in enumerate(blocks):
         if is_heading(orig, mod):
-            num, title = parse_sermon_heading(orig)
+            num, title, extra = parse_sermon_heading_extra(orig)
             if num is not None:
                 current_sermon = num
                 current_title = title
@@ -371,7 +518,7 @@ def main() -> None:
     para_in_sermon = 0
     for i, (orig, mod) in enumerate(blocks):
         if is_heading(orig, mod):
-            num, title = parse_sermon_heading(orig)
+            num, title, extra = parse_sermon_heading_extra(orig)
             if num is not None:
                 current_sermon = num
                 current_title = title
@@ -379,6 +526,20 @@ def main() -> None:
             else:
                 parallel_lines.append(f"## {title}")
             parallel_lines.append("")
+            if extra:
+                para_in_sermon += 1
+                parallel_lines.append(f"### Paragraph {para_in_sermon}")
+                parallel_lines.append("")
+                parallel_lines.append(f"**Original ({orig_date}):**")
+                parallel_lines.append("")
+                parallel_lines.append(escape_blockquote(extra))
+                parallel_lines.append("")
+                parallel_lines.append("**Modern English:**")
+                parallel_lines.append("")
+                parallel_lines.append(extra)
+                parallel_lines.append("")
+                parallel_lines.append("---")
+                parallel_lines.append("")
             continue
         para_in_sermon += 1
         parallel_lines.append(f"### Paragraph {para_in_sermon}")
@@ -412,7 +573,7 @@ def main() -> None:
     para_in_sermon = 0
     for i, (orig, mod) in enumerate(blocks):
         if is_heading(orig, mod):
-            num, title = parse_sermon_heading(orig)
+            num, title, extra = parse_sermon_heading_extra(orig)
             if num is not None:
                 current_sermon = num
                 current_title = title
@@ -420,6 +581,12 @@ def main() -> None:
             else:
                 modern_lines.append(f"## {title}")
             modern_lines.append("")
+            if extra:
+                para_in_sermon += 1
+                modern_lines.append(f"### Paragraph {para_in_sermon}")
+                modern_lines.append("")
+                modern_lines.append(extra)
+                modern_lines.append("")
             continue
         para_in_sermon += 1
         modern_lines.append(f"### Paragraph {para_in_sermon}")

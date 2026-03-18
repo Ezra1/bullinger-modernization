@@ -9,6 +9,7 @@ Requires: requests (pip install requests)
 import argparse
 import json
 import logging
+import re
 import sys
 import time
 from pathlib import Path
@@ -192,6 +193,185 @@ def parse_paragraphs(text: str) -> list[tuple[str, bool]]:
     return items
 
 
+def _roman_to_int(s: str) -> int | None:
+    s = s.strip().lower().replace(" ", "").replace("j", "i")
+    if not s:
+        return None
+    vals = {"i": 1, "v": 5, "x": 10, "l": 50, "c": 100, "d": 500, "m": 1000}
+    total = 0
+    prev = 0
+    for ch in reversed(s):
+        v = vals.get(ch)
+        if v is None:
+            return None
+        if v < prev:
+            total -= v
+        else:
+            total += v
+            prev = v
+    return total or None
+
+
+def _parse_sermon_heading(heading_line: str) -> tuple[int | None, str]:
+    """
+    Parse a TEI-derived sermon heading into (sermon_number, title).
+
+    Expected input is a single line starting with '##', such as:
+      - '## ... The.xxxiij. Sermon.'
+      - '## ... The first Sermon.'
+
+    Returns (None, title) when sermon number is not detected.
+    """
+    s = heading_line.strip()
+    if not s.startswith("##"):
+        return None, s
+    rest = s[2:].strip()
+
+    ordinal_to_int: dict[str, int] = {
+        "first": 1,
+        "second": 2,
+        "third": 3,
+        "fourth": 4,
+        "fifth": 5,
+        "sixth": 6,
+        "seventh": 7,
+        "eighth": 8,
+        "eight": 8,
+        "ninth": 9,
+        "tenth": 10,
+        "eleventh": 11,
+        "twelfth": 12,
+        "thirteenth": 13,
+        "fourteenth": 14,
+        "fifteenth": 15,
+        "sixteenth": 16,
+        "seventeenth": 17,
+        "eighteenth": 18,
+        "nineteenth": 19,
+        "twentieth": 20,
+        "twenty-first": 21,
+        "twenty-second": 22,
+        "twenty-third": 23,
+        "twenty-fourth": 24,
+        "twenty-fifth": 25,
+        "twenty-sixth": 26,
+        "twenty-seventh": 27,
+        "twenty-eighth": 28,
+        "twenty-ninth": 29,
+        "thirtieth": 30,
+        "thirty-first": 31,
+        "thirty-second": 32,
+        "thirty-third": 33,
+        "thirty-fourth": 34,
+        "thirty-fifth": 35,
+        "thirty-sixth": 36,
+        "thirty-seventh": 37,
+        "thirty-eighth": 38,
+        "thirty-ninth": 39,
+        "fortieth": 40,
+        "forty-first": 41,
+        "forty-second": 42,
+        "forty-third": 43,
+        "forty-fourth": 44,
+        "forty-fifth": 45,
+        "forty-sixth": 46,
+        "forty-seventh": 47,
+        "forty-eighth": 48,
+        "forty-ninth": 49,
+        "fiftieth": 50,
+        "fifty-first": 51,
+        "fifty-second": 52,
+        "fifty-third": 53,
+        "fifty-fourth": 54,
+        "fifty-fifth": 55,
+        "fifty-sixth": 56,
+        "fifty-seventh": 57,
+        "fifty-eighth": 58,
+        "fifty-ninth": 59,
+        "sixtieth": 60,
+        "sixty-first": 61,
+        "sixty-second": 62,
+        "sixty-third": 63,
+        "sixty-fourth": 64,
+        "sixty-fifth": 65,
+        "sixty-sixth": 66,
+        "sixty-seventh": 67,
+        "sixty-eighth": 68,
+        "sixty-ninth": 69,
+        "seventieth": 70,
+        "seventy-first": 71,
+        "seventy-second": 72,
+        "seventy-third": 73,
+        "seventy-fourth": 74,
+        "seventy-fifth": 75,
+        "seventy-sixth": 76,
+        "seventy-seventh": 77,
+        "seventy-eighth": 78,
+        "seventy-ninth": 79,
+        "eightieth": 80,
+        "eighty-first": 81,
+        "eighty-second": 82,
+        "eighty-third": 83,
+        "eighty-fourth": 84,
+        "eighty-fifth": 85,
+        "eighty-sixth": 86,
+        "eighty-seventh": 87,
+        "eighty-eighth": 88,
+        "eighty-ninth": 89,
+        "ninetieth": 90,
+        "ninety-first": 91,
+        "ninety-second": 92,
+        "ninety-third": 93,
+        "ninety-fourth": 94,
+        "ninety-fifth": 95,
+        "ninety-sixth": 96,
+        "ninety-seventh": 97,
+        "ninety-eighth": 98,
+        "ninety-ninth": 99,
+        "hundredth": 100,
+    }
+    for word, num in ordinal_to_int.items():
+        pat = re.compile(r"\bThe\s+" + re.escape(word) + r"\s+Sermon\.?\s*$", re.IGNORECASE)
+        if pat.search(rest):
+            title = pat.sub("", rest).strip()
+            title = re.sub(r"\s*¶\s*$", "", title).strip()
+            return num, title
+
+    # Common period style uses extra dots: "The.xxxiij. Sermon." or "The xxvj. Sermon."
+    roman_pat = re.compile(
+        r"\bThe\.?\s*\.?\s*([ivxlcdmj]+)\.?\s*Sermon\.?\s*$",
+        re.IGNORECASE,
+    )
+    m = roman_pat.search(rest)
+    if m:
+        num = _roman_to_int(m.group(1))
+        if num is not None:
+            title = rest[: m.start()].strip()
+            title = re.sub(r"\s*¶\s*$", "", title).strip()
+            return num, title
+
+    return None, rest
+
+
+def normalize_heading(heading_line: str) -> str:
+    """
+    Convert headings like:
+      '## ¶ ... The.xxxiij. Sermon.'
+    into:
+      '## Sermon 33: ¶ ...'
+
+    If we can't detect a sermon number, keep it as a plain '## <title>' heading.
+    """
+    s = heading_line.strip()
+    if not (s.startswith("##") and "\n" not in s):
+        return heading_line.strip()
+    num, title = _parse_sermon_heading(s)
+    title = re.sub(r"\s+", " ", title).strip()
+    if num is None:
+        return f"## {title}" if title else "##"
+    return f"## Sermon {num}: {title}" if title else f"## Sermon {num}"
+
+
 def needs_revision(critique: str) -> bool:
     """Return True if the critique indicates problems (i.e. revision is needed)."""
     return "no issues" not in critique.strip().lower()
@@ -283,11 +463,12 @@ def process_one_paragraph(
             progress_cb(current, total, msg)
 
     if is_heading:
+        normalized = normalize_heading(paragraph)
         return {
             "original": paragraph,
             "draft": "(heading preserved)",
             "critique": "",
-            "final": paragraph,
+            "final": normalized,
             "flagged": False,
         }
     # Pass 1: Draft — system prompt sets role, user message is the paragraph only
