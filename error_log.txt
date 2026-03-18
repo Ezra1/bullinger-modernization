@@ -1,0 +1,26 @@
+
+
+Mon Mar 16 12:10:49 EDT 2026
+Exception Occurred.
+
+Last progress message:  Reading BNC Word List... (cleared)
+
+Exception message:
+Error occurred reading SCOWL word list, please reinstall.
+
+java.io.FileNotFoundException: SCOWL word lists not found
+	at model.lookup.LookUpDictionary.readInScowlWordList(LookUpDictionary.java:290)
+	at model.lookup.LookUpDictionary.changeSetup(LookUpDictionary.java:95)
+	at model.lookup.LookUpDictionary.<init>(LookUpDictionary.java:62)
+	at gui.MainScreen.<init>(MainScreen.java:275)
+	at gui.MainScreen.<init>(MainScreen.java:166)
+	at gui.MainScreen$1.run(MainScreen.java:161)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)

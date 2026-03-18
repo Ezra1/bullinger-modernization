@@ -1,0 +1,12 @@
+bullinger-env/
+__pycache__/
+*.pyc
+.pytest_cache/
+04-modernized/checkpoint.json
+01-raw/B11837/
+01-raw/tcp-texts/
+.DS_Store
+*.swp
+*~
+.cursor/
+.vscode/
