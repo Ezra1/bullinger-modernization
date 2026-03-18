@@ -2,9 +2,19 @@ bullinger-env/
 __pycache__/
 *.pyc
 .pytest_cache/
+# Active workspace (repo-root pipeline folders are symlinks into work/)
+# Ignore all run inputs/outputs in work/, but keep the folder scaffold.
+work/**
+!work/**/
+!work/**/.gitkeep
+
+# Large/unneeded raw sources (applies to archived runs too)
+runs/**/01-raw/B11837/
+runs/**/01-raw/tcp-texts/
+
+# Checkpoints can be re-generated and are large/noisy
 04-modernized/checkpoint.json
-01-raw/B11837/
-01-raw/tcp-texts/
+runs/**/04-modernized/checkpoint.json
 .DS_Store
 *.swp
 *~

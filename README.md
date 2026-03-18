@@ -1,19 +1,27 @@
-# Bullinger Apocalypse
+# Bullinger Apocalypse (and other Early English texts)
 
-This project modernizes Heinrich Bullinger's 1561 Apocalypse sermons from Early Modern English to modern English. It uses a pipeline of TEI-XML extraction (from EEBO-TCP sources), VARD2 spelling normalization (Lancaster UCREL), and local LLM modernization via Ollama (draft → critique → conditional revision), then assembles a parallel edition and glossary.
+This repo was originally built to modernize Heinrich Bullinger's 1561 *Apocalypse* sermons from Early Modern English to modern English, but it’s designed to modernize **any** Early English text to modern English. It uses a pipeline of TEI-XML extraction (from EEBO-TCP sources), VARD2 spelling normalization (Lancaster UCREL), and local LLM modernization via Ollama (draft → critique → conditional revision), then assembles a parallel edition and glossary.
 
 ## Directory structure
 
 | Folder | Contents |
 |--------|----------|
-| **01-raw/** | Source TEI-XML and extracted/cleaned text. Place EEBO-TCP TEI here; `B11837/` and `tcp-texts/` are gitignored. |
-| **02-cleaned/** | Output of the cleaning step: plain text ready for VARD (abbreviation expansion, hyphen rejoining, gap normalization). |
-| **03-normalized/** | VARD2 output: spelling-normalized text. |
-| **04-modernized/** | LLM draft/review output: blocks with `[ORIGINAL]`, `[DRAFT]`, `[CRITIQUE]`, `[FINAL]`. Checkpoint and draft files go here. |
-| **05-output/** | Final artifacts: `parallel_edition.md`, `modern_only.md`, `glossary.md`. |
+| **runs/** | Archived, labeled modernization runs. `runs/latest/` points to the most recent archived run. |
+| **work/** | Clean workspace for the *next* text. The repo-root pipeline folders below are symlinks into here so scripts work without code changes. |
+| **01-raw/** | **Symlink →** `work/01-raw/`. Source TEI-XML and raw extracted text. |
+| **02-cleaned/** | **Symlink →** `work/02-cleaned/`. Output of the cleaning step: plain text ready for VARD. |
+| **03-normalized/** | **Symlink →** `work/03-normalized/`. VARD2 output: spelling-normalized text. |
+| **04-modernized/** | **Symlink →** `work/04-modernized/`. LLM draft/review output: blocks with `[ORIGINAL]`, `[DRAFT]`, `[CRITIQUE]`, `[FINAL]`. |
+| **05-output/** | **Symlink →** `work/05-output/`. Final artifacts: `parallel_edition.md`, `modern_only.md`, `glossary.md`. |
 | **default/** | VARD2 config (rules, variants, training data, options). |
 | **scripts/** | Extraction, cleaning, normalization, modernization, and build scripts. |
 | **tests/** | Tests for the pipeline. |
+
+## Get the modernized Bullinger text (this repo’s current deliverable)
+
+- **Modern-only edition**: `runs/latest/05-output/modern_only.md`
+- **Parallel edition (original + modern)**: `runs/latest/05-output/parallel_edition.md`
+- **Glossary**: `runs/latest/05-output/glossary.md`
 
 ## Pipeline stages
 
@@ -54,7 +62,9 @@ pip install -r requirements.txt
 
 ## Running the pipeline
 
-1. **Extract** from TEI (e.g. after placing EEBO-TCP XML in `01-raw/`):
+The defaults below write into the repo-root pipeline folders (`01-raw/` … `05-output/`), which are symlinks to `work/` to keep the next run clean.
+
+1. **Extract** from TEI (after placing TEI-XML in `01-raw/`):
    ```bash
    python scripts/extract_tei.py 01-raw/your_file.xml -o 02-cleaned
    ```
