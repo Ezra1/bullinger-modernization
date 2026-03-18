@@ -17,6 +17,11 @@ This repo was originally built to modernize Heinrich Bullinger's 1561 *Apocalyps
 | **scripts/** | Extraction, cleaning, normalization, modernization, and build scripts. |
 | **tests/** | Tests for the pipeline. |
 
+## Download VARD 2
+
+In order to run VARD 2, you will need to download Java. 
+You can find the download for VARD 2 here: https://ucrel.lancs.ac.uk/vard/download/
+
 ## Get the modernized Bullinger text (this repo’s current deliverable)
 
 - **Modern-only edition**: `runs/latest/05-output/modern_only.md`
