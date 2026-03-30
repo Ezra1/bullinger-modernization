@@ -1,3 +1,120 @@
 requests>=2.28.0
 pytest>=7.0.0
 lxml>=4.9.0
+
+# 
+# Before the final index, there is a bibliographical note and then a blank page then a page with the word index on it then a blank page, then the actual index that also has the title index on it. these are the pages including the first page of the index and the four pages before that:
+#
+# """
+# 
+# Bibliographical Note
+# 
+# No structured bibliography could be generated from the present manuscript source.
+# 
+# The file biblio/references.bib is retained as a production scaffold for later
+# 
+# Chicago-style note-and-bibliography work once full citation data has been curated.
+# 
+# Index
+# 
+# 
+# 
+# Index
+# 
+# Antichrist
+# 
+# as papal power, 251, 275,
+# 
+# 375, 381, 387, 409
+# 
+# conflict with Christ and the
+# 
+# church, 275, 303, 311,
+# 
+# 319
+# 
+# followers and ministers of,
+# 
+# 465, 563
+# 
+# marks and signs of, 387, 409
+# 
+# punishment of, 505, 563,
+# 
+# 657, 671
+# 
+# see also Beast; Papacy; Rome
+# 
+# Apocalypse (Book of). See
+# 
+# Revelation, book of
+# 
+# Aquinas, Thomas, 67, 289, 655,
+# 
+# 667
+# 
+# Arethas of Caesarea
+# 
+# as commentator on
+# 
+# Revelation, 3, 56, 83,
+# 
+# 166, 243, 290, 381, 486,
+# 
+# 600, 665
+# 
+# on millennial and
+# 
+# eschatological
+# 
+# questions, 582, 600
+# 
+# Augustine
+# 
+# on angels and their
+# 
+# worship, 551
+# 
+# on blessedness of the saints,
+# 
+# 607, 643
+# 
+# on The City of God, 185, 381,
+# 
+# 607, 643
+# 
+# on grace and free will, 241,
+# 
+# 251
+# 
+# on millenarianism and the
+# 
+# first resurrection, 581
+# 
+# on repentance and
+# 
+# salvation, 223
+# 
+# Augustine, Saint. See Augustine
+# 
+# Babylon
+# 
+# call to come out of, 519
+# 
+# fall of, 437, 513, 519, 533
+# 
+# lament over, 527
+# 
+# merchants and luxury of,
+# 
+# 527, 533
+# 
+# see also Rome; Whore of
+# 
+# Babylon
+# 
+# Beast
+# 
+# image of, 387
+# 
+# 679"""

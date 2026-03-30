@@ -20,3 +20,25 @@ runs/**/04-modernized/checkpoint.json
 *~
 .cursor/
 .vscode/
+
+# XeLaTeX book build artifacts
+2026-03-18_bullinger-apocalypse/book/**/*.aux
+2026-03-18_bullinger-apocalypse/book/**/*.log
+2026-03-18_bullinger-apocalypse/book/**/*.out
+2026-03-18_bullinger-apocalypse/book/**/*.toc
+2026-03-18_bullinger-apocalypse/book/**/*.idx
+2026-03-18_bullinger-apocalypse/book/**/*.ind
+2026-03-18_bullinger-apocalypse/book/**/*.ilg
+2026-03-18_bullinger-apocalypse/book/**/*.lof
+2026-03-18_bullinger-apocalypse/book/**/*.lot
+2026-03-18_bullinger-apocalypse/book/**/*.fls
+2026-03-18_bullinger-apocalypse/book/**/*.fdb_latexmk
+2026-03-18_bullinger-apocalypse/book/**/*.xdv
+2026-03-18_bullinger-apocalypse/book/**/*.synctex.gz
+2026-03-18_bullinger-apocalypse/book/**/*.bcf
+2026-03-18_bullinger-apocalypse/book/**/*.run.xml
+2026-03-18_bullinger-apocalypse/book/**/*.pdf
+
+# Keep the canonical deliverable PDF in the repo output folder
+!2026-03-18_bullinger-apocalypse/05-output/bullinger-apocalypse-sermons.pdf
+

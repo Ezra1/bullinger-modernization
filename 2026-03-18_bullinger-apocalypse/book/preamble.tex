@@ -1,0 +1,96 @@
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{english}
+\usepackage{csquotes}
+\usepackage{microtype}
+\usepackage{imakeidx}
+
+\defaultfontfeatures{Ligatures=TeX, Scale=MatchLowercase}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures=TeX,
+    RawFeature=+smcp
+  ]
+}{%
+  \setmainfont{P052}[
+    Numbers={OldStyle,Proportional},
+    Ligatures=TeX
+  ]
+}
+\IfFontExistsTF{TeX Gyre Heros}{\setsansfont{TeX Gyre Heros}}{\setsansfont{Noto Sans}}
+
+\setstocksize{9in}{6in}
+\settrimmedsize{\stockheight}{\stockwidth}{*}
+\settypeblocksize{7.25in}{28pc}{*}
+\setlrmargins{*}{*}{1.18}
+\setulmargins{*}{*}{1.55}
+\setheadfoot{18pt}{28pt}
+\setheaderspaces{*}{18pt}{*}
+\checkandfixthelayout
+
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{3em}
+\frenchspacing
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\brokenpenalty=5000
+\raggedbottom
+
+\setsecnumdepth{subsection}
+\maxtocdepth{chapter}
+\settocdepth{chapter}
+
+\setsecheadstyle{\normalfont\small\itshape}
+\setbeforesecskip{1.75\baselineskip plus .3\baselineskip minus .2\baselineskip}
+\setaftersecskip{0.75\baselineskip}
+\setsubsecheadstyle{\normalfont\itshape}
+\setbeforesubsecskip{1.25\baselineskip plus .2\baselineskip minus .2\baselineskip}
+\setaftersubsecskip{0.55\baselineskip}
+\renewcommand{\cftchapterfont}{\normalfont}
+\renewcommand{\cftchapterpagefont}{\normalfont}
+\setlength{\cftbeforechapterskip}{0.45\baselineskip}
+
+\makechapterstyle{bullinger}{%
+  \renewcommand{\chapterheadstart}{\vspace*{0.16\textheight}}
+  \renewcommand{\printchaptername}{}
+  \renewcommand{\chapternamenum}{}
+  \renewcommand{\printchapternum}{%
+    \centering
+    \normalfont\small\itshape Sermon \thechapter\par
+    \vskip 0.8\baselineskip
+  }
+  \renewcommand{\afterchapternum}{}
+  \renewcommand{\printchaptertitle}[1]{%
+    \centering
+    \normalfont\Large ##1\par
+    \vskip 2.2\baselineskip
+  }
+}
+\chapterstyle{bullinger}
+\aliaspagestyle{chapter}{empty}
+
+\makepagestyle{bullinger}
+\makeheadrule{bullinger}{\textwidth}{0.2pt}
+\makeevenhead{bullinger}{\small\upshape Bullinger's Apocalypse Sermons}{}{\small\thepage}
+\makeoddhead{bullinger}{\small\upshape\rightmark}{}{\small\thepage}
+\makeevenfoot{bullinger}{}{}{}
+\makeoddfoot{bullinger}{}{}{}
+\pagestyle{bullinger}
+\nouppercaseheads
+\makeatletter
+\renewcommand{\@makefnmark}{\hbox{\textsuperscript{\normalfont\@thefnmark}}}
+\renewcommand{\@makefntext}[1]{%
+  \noindent\hb@xt@1.5em{\hss\textsuperscript{\normalfont\@thefnmark}}#1%
+}
+\makeatother
+
+\renewcommand{\footnotesize}{\fontsize{9}{11}\selectfont}
+\setlength{\footnotesep}{0.7\baselineskip}
+\setlength{\skip\footins}{12pt plus 3pt minus 2pt}
+
+\makeindex[program=xindy,options=-L english -C utf8]
+
+\newcommand{\sourcegap}[1]{\textup{[#1]}}
